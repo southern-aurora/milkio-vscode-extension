@@ -1,0 +1,125 @@
+{
+  "name": "milkio-vscode-extension",
+  "displayName": "Milkio",
+  "description": "",
+  "author": "akirarika",
+  "publisher": "akirarika",
+  "icon": "icon.png",
+  "repository": "https://github.com/southern-aurora/milkio",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "milkio.open-extension-menu",
+        "title": "Milkio Extension Menu"
+      },
+      {
+        "command": "milkio.show-output-channel",
+        "title": "Milkio Output Channel"
+      },
+      {
+        "command": "milkio.http-server",
+        "title": "Milkio HTTP Server"
+      },
+      {
+        "command": "milkio.run-all-api-test",
+        "title": "Test All APIs (Milkio Project)"
+      },
+      {
+        "command": "milkio.build-dto",
+        "title": "Milkio Build DTO"
+      },
+      {
+        "command": "milkio.run-api-test",
+        "title": "Run API Test (Milkio Project)",
+        "icon": {
+          "light": "api-test-light.svg",
+          "dark": "api-test-dark.svg"
+        }
+      },
+      {
+        "command": "milkio.generate",
+        "title": "Milkio Generate"
+      },
+      {
+        "command": "milkio.generate-database",
+        "title": "Milkio Generate Database"
+      },
+      {
+        "command": "milkio.create-from-template",
+        "title": "Create From Template.. (Milkio)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "milkio.create-from-template",
+          "group": "1_modification",
+          "when": "explorerResourceIsFolder && isMilkioProject == true"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "milkio.run-api-test",
+          "group": "navigation",
+          "when": "showIconRunApiTest == true"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "milkio.run-api-test",
+        "key": "alt+r",
+        "mac": "cmd+shift+r",
+        "when": "showIconRunApiTest == true"
+      },
+      {
+        "command": "milkio.open-extension-menu",
+        "key": "alt+l",
+        "mac": "cmd+shift+l",
+        "when": "isMilkioProject == true"
+      }
+    ]
+  },
+  "scripts": {
+    "p": "vsce package",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
+    "@poech/camel-hump-under": "^1.1.0",
+    "@southern-aurora/tson": "^2.0.2",
+    "ejs": "^3.1.9",
+    "jiti": "^1.21.0",
+    "lodash": "^4.17.21",
+    "vsce": "^2.15.0",
+    "walk-sync": "^3.0.0"
+  }
+}
