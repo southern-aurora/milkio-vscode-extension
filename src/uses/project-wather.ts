@@ -8,11 +8,11 @@ export const useProjectWatcher = async (context: vscode.ExtensionContext) => {
   const checkProject = async (workspace: vscode.WorkspaceFolder | null | undefined) => {
     if (!workspace || !(await checkMilkioProject(workspace.uri.fsPath))) {
       states.publish("activeProject", null);
-      vscode.commands.executeCommand(`setContext`, `isMilkioProject`, false);
+      await vscode.commands.executeCommand(`setContext`, `isMilkioProject`, false);
       return;
     }
 
-    vscode.commands.executeCommand(`setContext`, `isMilkioProject`, true);
+    await vscode.commands.executeCommand(`setContext`, `isMilkioProject`, true);
     states.publish("activeProject", workspace);
   };
 
@@ -29,8 +29,10 @@ export const useProjectWatcher = async (context: vscode.ExtensionContext) => {
       states.publish("activeProject", null);
       return;
     }
-    const workspace = getWorkspace(editor.document.uri.fsPath);
-    await checkProject(workspace);
+    const workspaces = getWorkspace(editor.document.uri.fsPath);
+    for (const workspace of workspaces) {
+      await checkProject(workspace);
+    }
   };
   vscode.window.onDidChangeActiveTextEditor(handler);
   await handler();
