@@ -29,14 +29,17 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
     }
 
     const instantiateName = await vscode.window.showInputBox({
-      placeHolder: "Enter template name",
-      prompt: "What name should you give to the file(s) you created?",
+      placeHolder: "What name should you give to the file(s) you created?",
     });
     if (!instantiateName) {
       return;
     }
     if (!/^[a-z0-9/-]+$/.test(instantiateName)) {
       vscode.window.showInformationMessage(`The path can only contain lowercase letters, numbers, and "-".`);
+      return;
+    }
+    if (instantiateName === "src") {
+      vscode.window.showInformationMessage(`Cannot use "src" as a name.`);
       return;
     }
     const selected = await vscode.window.showQuickPick(items, {

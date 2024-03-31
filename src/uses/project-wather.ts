@@ -6,7 +6,7 @@ import { checkMilkioProject } from "../utils/check-milkio-project";
 
 export const useProjectWatcher = async (context: vscode.ExtensionContext) => {
   const checkProject = async (workspace: vscode.WorkspaceFolder | null | undefined) => {
-    if (!workspace || !(await checkMilkioProject(workspace.uri.fsPath))) {
+    if (!workspace) {
       states.publish("activeProject", null);
       await vscode.commands.executeCommand(`setContext`, `isMilkioProject`, false);
       return;
@@ -18,7 +18,8 @@ export const useProjectWatcher = async (context: vscode.ExtensionContext) => {
 
   // If there is only one workspace, there is no need to judge based on the way files are opened
   if (vscode.workspace.workspaceFolders?.length === 1) {
-    await checkProject(vscode.workspace.workspaceFolders[0]);
+    if (!(await checkMilkioProject(vscode.workspace.workspaceFolders[0].uri.fsPath))) await checkProject(undefined);
+    else await checkProject(vscode.workspace.workspaceFolders[0]);
     return;
   }
 
@@ -30,9 +31,18 @@ export const useProjectWatcher = async (context: vscode.ExtensionContext) => {
       return;
     }
     const workspaces = getWorkspace(editor.document.uri.fsPath);
+    let workspaceReal: vscode.WorkspaceFolder | undefined = undefined;
     for (const workspace of workspaces) {
-      await checkProject(workspace);
+      if (!workspace || !(await checkMilkioProject(workspace.uri.fsPath))) continue;
+      if (workspaceReal === undefined) {
+        workspaceReal = workspace;
+        continue;
+      } else {
+        if (workspace.uri.fsPath.length > workspaceReal.uri.fsPath.length) workspaceReal = workspace;
+        continue;
+      }
     }
+    await checkProject(workspaceReal);
   };
   vscode.window.onDidChangeActiveTextEditor(handler);
   await handler();

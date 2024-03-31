@@ -24,15 +24,15 @@ export const makeWorkspaceState = () => {
     generatingPromise: null | Promise<unknown>;
     cookbookBuilding: boolean;
     cookbookBuildingPromise: null | Promise<unknown>;
-    httpServerReloading: boolean;
-    httpServerTerminalName: null | string;
+    commandRunAndWatchReloading: boolean;
+    commandRunAndWatchTerminalName: null | string;
   }>();
   workspaceStates.publish("generating", false);
   workspaceStates.publish("generatingPromise", null);
   workspaceStates.publish("cookbookBuilding", false);
   workspaceStates.publish("cookbookBuildingPromise", null);
-  workspaceStates.publish("httpServerReloading", false);
-  workspaceStates.publish("httpServerTerminalName", null);
+  workspaceStates.publish("commandRunAndWatchReloading", false);
+  workspaceStates.publish("commandRunAndWatchTerminalName", null);
 
   return workspaceStates;
 };

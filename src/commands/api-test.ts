@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import { getWorkspaceStates, states } from "../states";
 import { waitingGenerated } from "../utils/waiting-generated";
 import { checkMilkioProject } from "../utils/check-milkio-project";
-import { buildCookbook } from "../utils/build-cookbook";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const output = states.pull("output") as vscode.OutputChannel;
 
@@ -39,20 +40,15 @@ export const registerApiTest = (context: vscode.ExtensionContext) => {
       isTransient: true,
       env: {
         ...process.env,
-        LOONGBAO_RUN_MODE: "API_TEST",
+        MILKIO_API_TEST_PATH: filePath,
       },
     });
 
-    let command = `bun run ./node_modules/milkio/c.ts test "${filePath}" "1"`;
-    if (process.platform === "win32") {
-      command = `$ErrorActionPreference = "Stop"; clear; ` + command + `; exit;`;
-    } else {
-      command = "clear && " + command + ` && exit`;
-    }
-    terminal.sendText(command);
-    terminal.show();
+    let packageJson = await JSON.parse((await readFile(join(workspace.uri.fsPath, "package.json"))).toString());
 
-    void buildCookbook(workspace, output, workspaceStates);
+    let command = packageJson?.scripts?.["api-test"];
+    terminal.sendText(`bun ./node_modules/milkio/c.ts EAR "${Buffer.from(command, 'utf-8').toString('base64')}"`);
+    terminal.show();
   });
 
   context.subscriptions.push(disposable);

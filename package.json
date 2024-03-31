@@ -6,7 +6,7 @@
   "publisher": "akirarika",
   "icon": "icon.png",
   "repository": "https://github.com/southern-aurora/milkio",
-  "version": "1.0.1",
+  "version": "1.0.6",
   "scripts": {
     "package": "rm -rf ./dist && npm run esbuild-base -- --minify && vsce package",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
@@ -44,16 +44,16 @@
         "title": "Milkio Output Channel"
       },
       {
-        "command": "milkio.http-server",
-        "title": "Milkio HTTP Server"
+        "command": "milkio.run-and-watch",
+        "title": "Milkio Run & Watch"
       },
       {
         "command": "milkio.run-all-api-test",
         "title": "Test All APIs (Milkio Project)"
       },
       {
-        "command": "milkio.build-dto",
-        "title": "Milkio Build DTO"
+        "command": "milkio.build-client",
+        "title": "Milkio Build Client"
       },
       {
         "command": "milkio.run-api-test",
@@ -126,6 +126,7 @@
     "@southern-aurora/tson": "^2.0.2",
     "ejs": "^3.1.9",
     "jiti": "^1.21.0",
+    "js-toml": "^1.0.0",
     "lodash": "^4.17.21",
     "vsce": "^2.15.0"
   }

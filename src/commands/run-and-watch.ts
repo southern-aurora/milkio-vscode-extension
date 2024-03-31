@@ -5,21 +5,21 @@ import { debounce } from "lodash";
 import { join } from "path";
 import { readFile } from "fs/promises";
 
-export const registerHttpServer = (context: vscode.ExtensionContext) => {
-  const disposable = vscode.commands.registerCommand("milkio.http-server", () => {
+export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
+  const disposable = vscode.commands.registerCommand("milkio.run-and-watch", () => {
     const workspace = states.pull("activeProject") as vscode.WorkspaceFolder;
     const workspaceStates = getWorkspaceStates(workspace);
-    startHTTPServer(workspace, workspaceStates);
+    startRunAndWatch(workspace, workspaceStates);
   });
 
-  const startHTTPServer = async (workspace: vscode.WorkspaceFolder, workspaceStates: ReturnType<typeof getWorkspaceStates>) => {
+  const startRunAndWatch = async (workspace: vscode.WorkspaceFolder, workspaceStates: ReturnType<typeof getWorkspaceStates>) => {
     if (!workspace || !workspaceStates) return;
-    workspaceStates.publish("httpServerReloading", true);
+    workspaceStates.publish("commandRunAndWatchReloading", true);
     const terminalName =
       vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1
-        ? `(${workspace.name}) Milkio HTTP Server`
-        : `Milkio HTTP Server`;
-    workspaceStates.publish("httpServerTerminalName", terminalName);
+        ? `(${workspace.name}) Milkio Run & Watch`
+        : `Milkio Run & Watch`;
+    workspaceStates.publish("commandRunAndWatchTerminalName", terminalName);
 
     let safe = 0;
     while (safe < 16 && vscode.window.terminals.find((terminal) => terminal.name === terminalName) !== undefined) {
@@ -27,7 +27,7 @@ export const registerHttpServer = (context: vscode.ExtensionContext) => {
       vscode.window.terminals.find((terminal) => terminal.name === terminalName)?.dispose();
     }
 
-    const generatePromise = generate(false, workspace.uri, true);
+    const generatePromise = generate(false, workspace.uri, true, true);
     await vscode.window.withProgress(
       {
         title: "Milkio Generating..",
@@ -46,7 +46,7 @@ export const registerHttpServer = (context: vscode.ExtensionContext) => {
       // If there is no terminal launched at startup, launch one. This is not necessary for Milkio but to optimize user experience. Otherwise, when Milkio exits, the entire panel will also exit.
       if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath }).show();
 
-      workspaceStates.publish("httpServerReloading", false);
+      workspaceStates.publish("commandRunAndWatchReloading", false);
       const terminal = vscode.window.createTerminal({
         name: terminalName,
         cwd: workspace.uri.fsPath,
@@ -57,24 +57,16 @@ export const registerHttpServer = (context: vscode.ExtensionContext) => {
       let packageJson = await JSON.parse((await readFile(join(workspace.uri.fsPath, "package.json"))).toString());
       let command = packageJson?.scripts?.dev;
       if (!command) {
-        vscode.window.showErrorMessage(
+        vscode.window.showInformationMessage(
           'No ("scripts" -> "dev") found in package.json. You need to write this command to instruct how to start Milkio.'
         );
         return;
       }
-      if (process.platform === "win32") {
-        command = `$ErrorActionPreference = "Stop"; clear; ` + command + `; pause; exit;`;
-      } else {
-        command = "clear && " + command + ` && read -n 1 && exit`;
-      }
-      terminal.sendText(command);
-      terminal.show();
 
-      const refocus = () => {
-        const document = vscode.window.activeTextEditor?.document;
-        if (document) vscode.window.showTextDocument(document);
-      };
-      setTimeout(refocus, 256);
+      // terminal.sendText(`bun ./node_modules/milkio/c.ts EAR "${Buffer.from(command, 'utf-8').toString('base64')}"`);
+      setTimeout(() => terminal.sendText(command), 768);
+
+      vscode.window.showInformationMessage(`Milkio is Running - The output of the operation can be viewed in the terminal (${terminalName}). The command being run is determined by package.json ("scripts" -> "dev").`);
     }, 256);
 
     const unsubscribe1 = workspaceStates.subscribe("generating", async (e) => {
@@ -86,7 +78,7 @@ export const registerHttpServer = (context: vscode.ExtensionContext) => {
 
       await execute();
     });
-    const unsubscribe2 = workspaceStates.subscribe("httpServerReloading", (e) => {
+    const unsubscribe2 = workspaceStates.subscribe("commandRunAndWatchReloading", (e) => {
       if (e.value !== true) return;
       unsubscribe1();
       unsubscribe2();
