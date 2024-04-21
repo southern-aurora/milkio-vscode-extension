@@ -8,7 +8,7 @@ await createTemplate(async (tools) => {
 import { defineApi, defineApiTest } from "milkio"
 
 /**
- * ${tools.name}
+ * ${tools.name()}
  */
 export const api = defineApi({
   meta: {

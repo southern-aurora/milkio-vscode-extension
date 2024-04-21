@@ -4,6 +4,7 @@ import { join } from "path";
 import { existsSync } from "fs";
 import { exec } from "child_process";
 import { getWorkspace } from "../utils/get-workspace";
+import { generate } from "../uses/auto-generate";
 
 export const createFromTemplate = (context: vscode.ExtensionContext) => {
   const disposable = vscode.commands.registerCommand("milkio.create-from-template", async (uri: vscode.Uri) => {
@@ -67,6 +68,8 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
         }
       );
     });
+
+    await generate(false, uri, true);
   });
 
   context.subscriptions.push(disposable);
