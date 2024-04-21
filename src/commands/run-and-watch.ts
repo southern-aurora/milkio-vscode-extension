@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getWorkspaceStates, states } from "../states";
+import { getWorkspaceStates, runtime, states } from "../states";
 import { generate } from "../uses/auto-generate";
 import { debounce } from "lodash";
 import { join } from "path";
@@ -65,8 +65,6 @@ export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
 
       // terminal.sendText(`bun ./node_modules/milkio/c.ts EAR "${Buffer.from(command, 'utf-8').toString('base64')}"`);
       setTimeout(() => terminal.sendText(command), 768);
-
-      vscode.window.showInformationMessage(`Milkio is Running - The output of the operation can be viewed in the terminal (${terminalName}). The command being run is determined by package.json ("scripts" -> "dev").`);
     }, 256);
 
     const unsubscribe1 = workspaceStates.subscribe("generating", async (e) => {

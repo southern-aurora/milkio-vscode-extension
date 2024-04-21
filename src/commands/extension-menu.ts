@@ -14,20 +14,20 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
     const workspaceStates = getWorkspaceStates(workspace);
     if (!workspace || !workspaceStates) return;
 
-    const items: Array<vscode.QuickPickItem & { command: string, builtIn: boolean, icon: string }> = [];
-    items.push({ label: "Run Milkio & Watch", description: "(built-in)", builtIn: true, command: '', icon: "plug" });
+    const items: Array<vscode.QuickPickItem & { command: string, builtIn: boolean, icon: string, env: Record<string, string> }> = [];
+    items.push({ label: "Run Milkio & Watch", description: "(built-in)", builtIn: true, command: '', icon: "plug", env: {} });
 
     if (existsSync(join(workspace.uri.fsPath, "milkio.toml"))) {
       const milkioConfig = load(await readFile(join(workspace.uri.fsPath, "milkio.toml"), "utf-8")) as MilkioConfig;
       if (milkioConfig?.menubar?.commands) {
         for (const command of milkioConfig.menubar.commands) {
-          items.push({ label: command.name ?? 'no name', command: command.script || 'echo "no script"', builtIn: false, icon: command.icon ?? 'plug' });
+          items.push({ label: command.name ?? 'no name', command: command.script || 'echo "no script"', builtIn: false, icon: command.icon ?? 'plug', env: command.env ?? {} });
         }
       }
     }
 
-    items.push({ label: "Generate", description: "(built-in)", builtIn: true, command: '', icon: "plug" });
-    items.push({ label: "Open Milkio Documents (via Browser)", builtIn: true, description: "(built-in)", command: '', icon: "plug" });
+    items.push({ label: "Generate", description: "(built-in)", builtIn: true, command: '', icon: "plug", env: {} });
+    items.push({ label: "Open Milkio Documents (via Browser)", builtIn: true, description: "(built-in)", command: '', icon: "plug", env: {} });
 
     const selected = await vscode.window.showQuickPick(items, {
       placeHolder: (process.platform !== "darwin" ? "(ALT + L)" : "(⌘ + ⇧ + L)") + ` can open milkio menubar`,
@@ -81,6 +81,7 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
         isTransient: true,
         env: {
           ...env,
+          ...selected.env,
         },
       });
 
@@ -99,6 +100,6 @@ export type MilkioConfig = {
     insignificant?: Array<string>;
   },
   menubar?: {
-    commands?: Array<{ name?: string, script?: string, icon?: string }>;
+    commands?: Array<{ name?: string, script?: string, icon?: string, env?: Record<string, string> }>;
   }
 };

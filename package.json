@@ -6,7 +6,7 @@
   "publisher": "akirarika",
   "icon": "icon.png",
   "repository": "https://github.com/southern-aurora/milkio",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "scripts": {
     "package": "rm -rf ./dist && npm run esbuild-base -- --minify && vsce package",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
@@ -73,7 +73,7 @@
       },
       {
         "command": "milkio.create-from-template",
-        "title": "Create From Template.. (Milkio)"
+        "title": "Create From Template.."
       }
     ],
     "menus": {
@@ -81,7 +81,7 @@
         {
           "command": "milkio.create-from-template",
           "group": "1_modification",
-          "when": "explorerResourceIsFolder && isMilkioProject == true"
+          "when": "explorerResourceIsFolder"
         }
       ],
       "editor/title": [

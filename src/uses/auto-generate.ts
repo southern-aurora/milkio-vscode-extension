@@ -109,8 +109,11 @@ export const useAutoGenerate = (context: vscode.ExtensionContext) => {
   });
 
   autoGenerateWatcher.onDidChange(async (e) => generate(true, e));
-  autoGenerateWatcher.onDidCreate(async (e) => (runtime.notFirstGen = false));
   autoGenerateWatcher.onDidDelete(async (e) => generate(false, e));
+  autoGenerateWatcher.onDidCreate(async (e) => {
+    runtime.notFirstGen = false;
+    generate(false, e);
+  });
 
   context.subscriptions.push(disposable);
 };

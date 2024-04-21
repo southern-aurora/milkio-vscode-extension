@@ -3,15 +3,14 @@ import { getWorkspaceStates, states } from "../states";
 import { join } from "path";
 import { existsSync } from "fs";
 import { exec } from "child_process";
+import { getWorkspace } from "../utils/get-workspace";
 
 export const createFromTemplate = (context: vscode.ExtensionContext) => {
   const disposable = vscode.commands.registerCommand("milkio.create-from-template", async (uri: vscode.Uri) => {
-    const workspace = states.pull("activeProject") as vscode.WorkspaceFolder;
-    const workspaceStates = getWorkspaceStates(workspace);
-    if (!workspace || !workspaceStates) return;
+    const workspace = getWorkspace(uri.fsPath)[0];
 
     const output = states.pull("output") as vscode.OutputChannel;
-    const items: Array<vscode.QuickPickItem> = [{ label: "api", description: "(built-in)" }];
+    const items: Array<vscode.QuickPickItem> = [];
 
     const templates = [
       // read /node_modules/milkio/templates
@@ -34,7 +33,7 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
     if (!instantiateName) {
       return;
     }
-    if (!/^[a-z0-9/-]+$/.test(instantiateName)) {
+    if (!/^[a-z0-9/$/-]+$/.test(instantiateName)) {
       vscode.window.showInformationMessage(`The path can only contain lowercase letters, numbers, and "-".`);
       return;
     }
@@ -48,11 +47,7 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
     if (!selected) return;
 
     let path: string;
-    if (selected.label === "api") {
-      path = join(workspace.uri.fsPath, "node_modules", "milkio", "templates", "api.ts");
-    } else {
-      path = join(workspace.uri.fsPath, ".templates", `${selected.label}.ts`);
-    }
+    path = join(workspace.uri.fsPath, ".templates", `${selected.label}.ts`);
 
     await new Promise((resolve) => {
       exec(
