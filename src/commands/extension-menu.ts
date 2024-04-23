@@ -6,6 +6,7 @@ import { cwd, env } from 'node:process';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { checkMilkioProject } from '../utils/check-milkio-project';
 
 export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
   const output = states.pull("output") as vscode.OutputChannel;
@@ -13,6 +14,7 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
     const workspace = states.pull("activeProject") as vscode.WorkspaceFolder;
     const workspaceStates = getWorkspaceStates(workspace);
     if (!workspace || !workspaceStates) return;
+    if (!await checkMilkioProject(workspace.uri.fsPath)) return;
 
     const items: Array<vscode.QuickPickItem & { command: string, builtIn: boolean, icon: string, env: Record<string, string> }> = [];
     items.push({ label: "Run Milkio & Watch", description: "(built-in)", builtIn: true, command: '', icon: "plug", env: {} });

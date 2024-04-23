@@ -15,12 +15,8 @@ export const registerApiTest = (context: vscode.ExtensionContext) => {
     await waitingGenerated(workspaceStates);
     const docment = vscode.window.activeTextEditor?.document;
     if (!docment) return;
-    if (!(await checkMilkioProject(workspace.uri.fsPath))) {
-      vscode.window.showInformationMessage(
-        "Have you opened the parent or child folder? Please try reopening the directory or workspace using VSCode so that the Milkio Project is located in the root directory of VSCode."
-      );
-      return;
-    }
+    if (!(await checkMilkioProject(workspace.uri.fsPath))) return;
+
     const filePath = docment.uri.fsPath.slice(workspace.uri.fsPath.length + "/src/app/".length).slice(0, -3);
     const terminalName =
       vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1
