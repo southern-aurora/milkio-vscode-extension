@@ -4,6 +4,7 @@ import { waitingGenerated } from "../utils/waiting-generated";
 import { checkMilkioProject } from "../utils/check-milkio-project";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { getEnv } from "../utils/get-env";
 
 const output = states.pull("output") as vscode.OutputChannel;
 
@@ -27,7 +28,7 @@ export const registerApiTest = (context: vscode.ExtensionContext) => {
     vscode.window.terminals.find((terminal) => terminal.name.endsWith(`Milkio All API Test`))?.dispose();
 
     // If there is no terminal launched at startup, launch one. This is not necessary for Milkio but to optimize user experience. Otherwise, when Milkio exits, the entire panel will also exit.
-    if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath }).show();
+    if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath, env: { ...getEnv() } }).show();
 
     const terminal = vscode.window.createTerminal({
       name: terminalName,
@@ -35,7 +36,7 @@ export const registerApiTest = (context: vscode.ExtensionContext) => {
       iconPath: new vscode.ThemeIcon("beaker"),
       isTransient: true,
       env: {
-        ...process.env,
+        ...getEnv(),
         MILKIO_API_TEST_PATH: filePath,
       },
     });

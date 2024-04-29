@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { checkMilkioProject } from '../utils/check-milkio-project';
+import { getEnv } from '../utils/get-env';
 
 export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
   const output = states.pull("output") as vscode.OutputChannel;
@@ -74,7 +75,7 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
       vscode.window.terminals.find((terminal) => terminal.name.endsWith(`${selected.label}`))?.dispose();
       vscode.window.terminals.find((terminal) => terminal.name.endsWith(`${selected.label}`))?.dispose();
       // If there is no terminal launched at startup, launch one. This is not necessary for Milkio but to optimize user experience. Otherwise, when Milkio exits, the entire panel will also exit.
-      if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath }).show();
+      if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath, env: { ...getEnv() } }).show();
 
       const terminal = vscode.window.createTerminal({
         name: terminalName,
@@ -82,7 +83,7 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
         iconPath: new vscode.ThemeIcon("beaker"),
         isTransient: true,
         env: {
-          ...env,
+          ...getEnv(),
           ...selected.env,
         },
       });

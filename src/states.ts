@@ -10,11 +10,14 @@ export const states = definePurinPubsub<{
   output: vscode.OutputChannel;
   statusBar: vscode.StatusBarItem;
   activeProject: null | vscode.WorkspaceFolder;
+  // The user may not have set the environment variable, but actually installed bun (in the default~/. bun/bin/bun). If this value is true, it indicates that the user is in this situation. In this case, when calling bun, an absolute path is used
+  absoluteBun: boolean;
 }>();
 
 states.publish("output", vscode.window.createOutputChannel("Milkio"));
 states.publish("statusBar", vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100));
 states.publish("activeProject", null);
+states.publish("absoluteBun", false);
 
 export const workspaceStatesMap = new Map<string, ReturnType<typeof makeWorkspaceState>>();
 

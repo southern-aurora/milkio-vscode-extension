@@ -4,6 +4,7 @@ import { generate } from "../uses/auto-generate";
 import { debounce } from "lodash";
 import { join } from "path";
 import { readFile } from "fs/promises";
+import { getEnv } from "../utils/get-env";
 
 export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
   const disposable = vscode.commands.registerCommand("milkio.run-and-watch", () => {
@@ -44,7 +45,7 @@ export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
 
     const execute = debounce(async () => {
       // If there is no terminal launched at startup, launch one. This is not necessary for Milkio but to optimize user experience. Otherwise, when Milkio exits, the entire panel will also exit.
-      if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath }).show();
+      if (vscode.window.terminals.length === 0) vscode.window.createTerminal({ cwd: workspace.uri.fsPath, env: { ...getEnv() } }).show();
 
       workspaceStates.publish("commandRunAndWatchReloading", false);
       const terminal = vscode.window.createTerminal({
@@ -52,6 +53,7 @@ export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
         cwd: workspace.uri.fsPath,
         iconPath: new vscode.ThemeIcon("symbol-method"),
         isTransient: true,
+        env: { ...getEnv() },
       });
 
       let packageJson = await JSON.parse((await readFile(join(workspace.uri.fsPath, "package.json"))).toString());
@@ -63,8 +65,8 @@ export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
         return;
       }
 
-      // terminal.sendText(`bun ./node_modules/milkio/c.ts EAR "${Buffer.from(command, 'utf-8').toString('base64')}"`);
-      setTimeout(() => terminal.sendText(command), 768);
+      // Sometimes, a file creation occurs within VS Code, but Bun fails to locate it. By introducing a suitable delay, the issue can be mitigated.
+      setTimeout(() => terminal.sendText(command), 1440);
     }, 256);
 
     const unsubscribe1 = workspaceStates.subscribe("generating", async (e) => {

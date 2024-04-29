@@ -4,6 +4,8 @@ import * as vscode from "vscode";
 import { exec } from "node:child_process";
 import { env } from "node:process";
 import { states } from "../states";
+import { getEnv } from "./get-env";
+import { getBun } from "./get-bun";
 
 export const checkMilkioProject = async (fspath: string): Promise<boolean> => {
   if (!(existsSync(join(fspath, "package.json")))) return false;
@@ -21,12 +23,12 @@ export const checkMilkioProject = async (fspath: string): Promise<boolean> => {
   if (!(existsSync(join(fspath, "node_modules")))) {
     let installSuccess = false;
     const bunInstalling = new Promise((resolve) => {
-      const command = `bun install`;
+      const command = `${getBun()} install`;
       exec(
         command,
         {
           cwd: fspath,
-          env: { ...env },
+          env: { ...getEnv() },
         },
         (error, stdout) => {
           output.append(stdout);

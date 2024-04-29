@@ -5,6 +5,8 @@ import { join } from "path";
 import { existsSync, rmSync } from "node:fs";
 import { getWorkspaceStates, runtime, states } from "../states";
 import { waitingGenerated } from "../utils/waiting-generated";
+import { getEnv } from "../utils/get-env";
+import { getBun } from "../utils/get-bun";
 
 const validator = (file: vscode.Uri, workspace: vscode.WorkspaceFolder) => {
   // if return true, trigger generation
@@ -41,19 +43,19 @@ export const generate = async (partial: boolean, file: vscode.Uri, force?: boole
   workspaceStates.publish(
     "generatingPromise",
     new Promise((resolve) => {
-      const command = `bun run ./node_modules/milkio/c.ts gen:significant`;
+      const command = `${getBun()} run ./node_modules/milkio/c.ts gen:significant`;
       exec(
         command,
         {
           cwd: workspace.uri.fsPath,
-          env: { ...env },
+          env: { ...getEnv() },
         },
         (error, stdout) => {
           output.append(stdout);
           if (error) {
             output.append(error.message);
             if (error.stack) output.append(error.stack);
-            output.show();
+            // output.show();
           }
           resolve(undefined);
         }
@@ -66,19 +68,19 @@ export const generate = async (partial: boolean, file: vscode.Uri, force?: boole
 
   // Insignificant
   const insignificantPromise = new Promise((resolve) => {
-    const command = `bun run ./node_modules/milkio/c.ts gen:insignificant`;
+    const command = `${getBun()} run ./node_modules/milkio/c.ts gen:insignificant`;
     exec(
       command,
       {
         cwd: workspace.uri.fsPath,
-        env: { ...env },
+        env: { ...getEnv() },
       },
       (error, stdout) => {
         output.append(stdout);
         if (error) {
           output.append(error.message);
           if (error.stack) output.append(error.stack);
-          output.show();
+          // output.show();
         }
 
         resolve(undefined);

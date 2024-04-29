@@ -1,17 +1,32 @@
 import { exec } from "child_process";
 import * as vscode from "vscode";
 import { states } from "../states";
+import { getEnv } from "./get-env";
+import { existsSync } from "fs";
+import { join } from "path";
+
+const output = states.pull("output") as vscode.OutputChannel;
 
 export const checkBunInstalled = () => {
   return new Promise((resolve, reject) => {
     const workspace = states.pull("activeProject") as vscode.WorkspaceFolder;
 
-    exec("bun --version", (error, stdout) => {
+    exec("bun --version", {
+      env: { ...getEnv() },
+    }, (error, stdout) => {
       if (!error) {
         resolve(true);
         return;
       }
-      console.log("bun is not installed");
+
+      if (existsSync(join(process.env.HOME ?? process.env.USERPROFILE!, '.bun', 'bin', 'bun'))) {
+        states.publish('absoluteBun', true);
+        resolve(true);
+        return;
+      }
+
+      output.append('Bun is not installed');
+
       vscode.window.showInformationMessage(
         "Bun is not installed. Although Milkio does not rely on any JavaScript runtime, it needs to use Bun in the generation phase to directly run TypeScript."
       );
