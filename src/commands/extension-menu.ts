@@ -57,7 +57,7 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
           ? `(${workspace.name}) ${selected.label}`
           : `${selected.label}`;
 
-      const generatePromise = generate(false, workspace.uri, true);
+      const generatePromise = generate(workspace.uri, true);
       await vscode.window.withProgress(
         {
           title: "Milkio Generating..",

@@ -10,14 +10,21 @@ import { getBun } from "../utils/get-bun";
 
 const validator = (file: vscode.Uri, workspace: vscode.WorkspaceFolder) => {
   // if return true, trigger generation
-  if (file.fsPath === join(workspace.uri.fsPath, "index.ts")) return true;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "src"))) return true;
-  return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, ".publish"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, ".templates"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, ".vscode"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "drizzle"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "prisma"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "generated"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "public"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "dist"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "project"))) return false;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "node_modules"))) return false;
+  return true;
 };
 
-export const generate = async (partial: boolean, file: vscode.Uri, force?: boolean, waitingInsignificant?: boolean) => {
+export const generate = async (file: vscode.Uri, force?: boolean, waitingInsignificant?: boolean) => {
   if (runtime.notFirstGen === false) {
-    partial = false;
     runtime.notFirstGen = true;
   }
   const output = states.pull("output") as vscode.OutputChannel;
@@ -101,7 +108,7 @@ export const useAutoGenerate = (context: vscode.ExtensionContext) => {
 
   const toGenerate = async (workspace: vscode.WorkspaceFolder | null) => {
     if (!workspace) return;
-    await generate(false, workspace.uri, true);
+    await generate(workspace.uri, true);
   };
 
   const disposable = vscode.commands.registerCommand("milkio.generate", async () => {
@@ -110,11 +117,11 @@ export const useAutoGenerate = (context: vscode.ExtensionContext) => {
     await waitingGenerated(getWorkspaceStates(workspace));
   });
 
-  autoGenerateWatcher.onDidChange(async (e) => generate(true, e));
-  autoGenerateWatcher.onDidDelete(async (e) => generate(false, e));
+  autoGenerateWatcher.onDidChange(async (e) => generate(e));
+  autoGenerateWatcher.onDidDelete(async (e) => generate(e));
   autoGenerateWatcher.onDidCreate(async (e) => {
     runtime.notFirstGen = false;
-    generate(false, e);
+    generate(e);
   });
 
   context.subscriptions.push(disposable);

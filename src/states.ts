@@ -23,6 +23,7 @@ export const workspaceStatesMap = new Map<string, ReturnType<typeof makeWorkspac
 
 export const makeWorkspaceState = () => {
   const workspaceStates = definePurinPubsub<{
+    installing: boolean;
     generating: boolean;
     generatingPromise: null | Promise<unknown>;
     cookbookBuilding: boolean;

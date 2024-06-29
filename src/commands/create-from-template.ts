@@ -52,9 +52,11 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
     let path: string;
     path = join(workspace.uri.fsPath, ".templates", `${selected.label}.ts`);
 
+    let command = `${getBun()} run ${path} '${instantiateName}' '${uri.fsPath}'`
+    if (process.platform === "win32") command = `powershell.exe -command "${command}"`
     await new Promise((resolve) => {
       exec(
-        `${getBun()} run ${path} '${instantiateName}' '${uri.fsPath}'`,
+        command,
         {
           cwd: workspace.uri.fsPath,
           env: { ...getEnv() },
@@ -64,7 +66,7 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
           if (error) {
             output.append(error.message);
             if (error.stack) output.append(error.stack);
-            vscode.window.showErrorMessage(`Template creation failed`);
+            vscode.window.showErrorMessage(`Template create failed -- ${JSON.stringify({ message: error.message, stack: error.stack, error: error })}`);
             output.show();
           }
           resolve(undefined);
@@ -72,7 +74,7 @@ export const createFromTemplate = (context: vscode.ExtensionContext) => {
       );
     });
 
-    await generate(false, uri, true);
+    await generate(uri, true);
   });
 
   context.subscriptions.push(disposable);

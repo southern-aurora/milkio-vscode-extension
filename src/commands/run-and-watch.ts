@@ -28,7 +28,7 @@ export const registerRunAndWatch = (context: vscode.ExtensionContext) => {
       vscode.window.terminals.find((terminal) => terminal.name === terminalName)?.dispose();
     }
 
-    const generatePromise = generate(false, workspace.uri, true, true);
+    const generatePromise = generate(workspace.uri, true, true);
     await vscode.window.withProgress(
       {
         title: "Milkio Generating..",
