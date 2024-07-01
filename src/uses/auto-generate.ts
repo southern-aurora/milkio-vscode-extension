@@ -1,8 +1,7 @@
-import { env } from "process";
 import * as vscode from "vscode";
 import { exec } from "node:child_process";
-import { join } from "path";
-import { existsSync, rmSync } from "node:fs";
+import { join, sep } from "node:path";
+import { rmSync } from "node:fs";
 import { getWorkspaceStates, runtime, states } from "../states";
 import { waitingGenerated } from "../utils/waiting-generated";
 import { getEnv } from "../utils/get-env";
@@ -10,17 +9,17 @@ import { getBun } from "../utils/get-bun";
 
 const validator = (file: vscode.Uri, workspace: vscode.WorkspaceFolder) => {
   // if return true, trigger generation
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, ".publish"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, ".templates"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, ".vscode"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "drizzle"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "prisma"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "generated"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "public"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "dist"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "project"))) return false;
-  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "node_modules"))) return false;
-  return true;
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "src"))) return true;
+  // client
+  if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client"))) {
+    if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "dist"))) return false;
+    if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "project"))) return false;
+    if (file.fsPath.startsWith(join(workspace.uri.fsPath, "packages", "client", "node_modules"))) return false;
+    return true;
+  }
+  // files in the root directory
+  if (workspace.uri.fsPath.split(sep).length + 1 === file.fsPath.length) return true;
+  return false;
 };
 
 export const generate = async (file: vscode.Uri, force?: boolean, waitingInsignificant?: boolean) => {
