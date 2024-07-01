@@ -41,7 +41,7 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
       if (selected.label === "Run Milkio & Watch") {
         vscode.commands.executeCommand("milkio.run-and-watch");
       } else if (selected.label === "Generate") {
-        if (vscode.window.terminals.find((terminal) => terminal.name.endsWith(`Milkio Run & Watch`))) {
+        if (vscode.window.terminals.find((terminal) => terminal.name === (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1 ? `(${workspace.name}) Milkio Run & Watch` : `Milkio Run & Watch`))) {
           vscode.window.showErrorMessage(
             "Milkio Run & Watch is in the open, generate will cause it to throw an exception. Please close and try again."
           );
@@ -87,10 +87,10 @@ export const registerExtensionMenu = (context: vscode.ExtensionContext) => {
           ...selected.env,
         },
       });
+      terminal.show();
 
       let command = selected.command;
       terminal.sendText(`bun ./node_modules/milkio/c.ts EAR "${Buffer.from(command, 'utf-8').toString('base64')}"`);
-      terminal.show();
     }
   });
 

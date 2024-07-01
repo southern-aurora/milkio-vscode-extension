@@ -13,7 +13,10 @@ export const registerApiTest = (context: vscode.ExtensionContext) => {
     const workspace = states.pull("activeProject") as vscode.WorkspaceFolder;
     const workspaceStates = getWorkspaceStates(workspace);
     if (!workspace || !workspaceStates) return;
-    await waitingGenerated(workspaceStates);
+    const milkioWatcher = vscode.window.terminals.find((terminal) => terminal.name === (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1 ? `(${workspace.name}) Milkio Run & Watch` : `Milkio Run & Watch`))
+    if (!milkioWatcher) { await vscode.commands.executeCommand("milkio.run-and-watch"); }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await workspaceStates.pull("generatingPromise");
     const docment = vscode.window.activeTextEditor?.document;
     if (!docment) return;
     if (!(await checkMilkioProject(workspace.uri.fsPath))) return;
@@ -42,10 +45,9 @@ export const registerApiTest = (context: vscode.ExtensionContext) => {
     });
 
     let packageJson = await JSON.parse((await readFile(join(workspace.uri.fsPath, "package.json"))).toString());
-
     let command = packageJson?.scripts?.["api-test"];
     terminal.sendText(`bun ./node_modules/milkio/c.ts EAR "${Buffer.from(command, 'utf-8').toString('base64')}"`);
-    terminal.show();
+    setTimeout(() => terminal.show(), 500);
   });
 
   context.subscriptions.push(disposable);
